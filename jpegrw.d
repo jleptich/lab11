@@ -1,2 +1,1 @@
--MM
-jpegrw.c
+jpegrw.o: jpegrw.c jpegrw.h

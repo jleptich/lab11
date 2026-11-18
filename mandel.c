@@ -26,9 +26,9 @@ int main( int argc, char *argv[] )
 	// These are the default configuration values used
 	// if no command line arguments are given.
 	const char *outfile = "mandel.jpg";
-	double xcenter = 0;
-	double ycenter = 0;
-	double xscale = 4;
+	double xcenter = 0.351;
+	double ycenter = 0.098;
+	double xscale = .01;
 	double yscale = 0; // calc later
 	int    image_width = 1000;
 	int    image_height = 1000;

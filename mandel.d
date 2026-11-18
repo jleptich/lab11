@@ -1,2 +1,1 @@
--MM
-mandel.c
+mandel.o: mandel.c jpegrw.h
