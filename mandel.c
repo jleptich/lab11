@@ -26,10 +26,10 @@ int main( int argc, char *argv[] )
 	// These are the default configuration values used
 	// if no command line arguments are given.
 	const char *outfile = "mandel.jpg";
-	double xcenter = 0.351;
-	double ycenter = 0.098;
-	double xscale = .01;
-	double yscale = 0; // calc later
+	double xcenter = 0.3509991;
+	double ycenter = 0.09711805;
+	double xscale = 0.000000001;
+	double yscale = 1; // calc later
 	int    image_width = 1000;
 	int    image_height = 1000;
 	int    max = 1000;
@@ -72,7 +72,7 @@ int main( int argc, char *argv[] )
 	yscale = xscale / image_width * image_height;
 
 	// Display the configuration of the image.
-	printf("mandel: x=%lf y=%lf xscale=%lf yscale=%1f max=%d outfile=%s\n",xcenter,ycenter,xscale,yscale,max,outfile);
+	printf("mandel: x=%lf y=%lf xscale=%.10f yscale=%.10f max=%d outfile=%s\n",xcenter,ycenter,xscale,yscale,max,outfile);
 
 	// Create a raw image of the appropriate size.
 	imgRawImage* img = initRawImage(image_width,image_height);
