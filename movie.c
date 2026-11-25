@@ -21,16 +21,17 @@ command line: gcc movie.c -o movie -lpthread -pthread -Wall -Wextra -lm
 //Control macros for the scale and the multiplication factor
 #define FINAL_SCALE 0.000000001
 #define DECREMENTS 0.66069
-void create_frame(double xvalue, int count);
+void create_frame(double xvalue, int count, int thread);
 
 int main(int argc, char *argv[]){
     int num_child = 0;
     char name[] = "/memory";
     //initializes semaphore and the two shared memory variables
     sem_t *memory = sem_open(name, O_CREAT, 0666,1);
-    double *xvalue_hold = mmap(NULL,sizeof(int),PROT_READ | PROT_WRITE,MAP_SHARED | MAP_ANONYMOUS,-1,0);
+    double *xvalue_hold = mmap(NULL,sizeof(double),PROT_READ | PROT_WRITE,MAP_SHARED | MAP_ANONYMOUS,-1,0);
     int *hold_count = mmap(NULL,sizeof(int),PROT_READ | PROT_WRITE,MAP_SHARED | MAP_ANONYMOUS,-1,0);
     
+    int threads = 1;
     if(xvalue_hold == MAP_FAILED || hold_count == MAP_FAILED){
         perror("map intialization");
         exit(1);
@@ -39,10 +40,14 @@ int main(int argc, char *argv[]){
     if(argc == 2){
         num_child = atoi(argv[1]);
     }
+    else if(argc == 3){
+        num_child = atoi(argv[1]);
+        threads  = atoi(argv[2]);
+    }
 
     //Value of the xscale after the initial processes were created
     *xvalue_hold = 1*pow(DECREMENTS, (double)num_child);
-    *hold_count = num_child+1;
+    *hold_count = num_child;
     pid_t pid;
     double xvalue = 1;
     int count = 1;
@@ -69,7 +74,7 @@ int main(int argc, char *argv[]){
 
         //need to create another child that runs create frame so it can runthe execve function that ends the process
         if(pid_hold == 0){
-        create_frame(xvalue,count);
+        create_frame(xvalue,count, threads);
         }
         //Updates the next value for the xscale from the shared memory
         sem_wait(memory);
@@ -85,7 +90,7 @@ int main(int argc, char *argv[]){
     if(pid==0){
         exit(1);
     }
-    waitpid(pid,NULL,0);
+    while (waitpid(-1, NULL, 0) > 0);
 
     //clean up function calls
     printf("Frame generation finished!\n");
@@ -96,7 +101,7 @@ int main(int argc, char *argv[]){
     return 0;
 }
 
-void create_frame(double xvalue, int count){
+void create_frame(double xvalue, int count, int thread){
 
     //xcenter and ycenter used
     double xcenter = 0.3509991;
@@ -108,15 +113,20 @@ void create_frame(double xvalue, int count){
     char buff2[30];
     char buff3[30];
     char buff4[20];
+    char buff5[10];
     snprintf(buff1,40, "%.12f",xvalue);
     snprintf(buff2,30, "%.12f",xcenter);
     snprintf(buff3,30, "%.12f",ycenter);
     snprintf(buff4,20, "mandel%d.jpg",count);
+    snprintf(buff5, 10, "%d",thread);
     char *envp[] = {NULL};
-    char *argv[] = {"./mandel","-s",buff1 ,"-x", buff2, "-y",buff3 ,"-o", buff4,NULL};
+    char *argv[] = {"./mandel","-s",buff1 ,"-x", buff2, "-y",buff3 ,"-o", buff4,"-t", buff5, NULL};
 
     //runs execve function which runs the mandel program
-    execve("./mandel",argv, envp);
+    if(execve("./mandel",argv, envp) == -1){
+        perror("execve did not run\n");
+        exit(1);
+    }
 
 
 }
